@@ -1,12 +1,33 @@
 import 'package:expense_planner/common/helpers.dart';
 import 'package:flutter/material.dart';
 
-class NewTransaction extends StatelessWidget {
-  NewTransaction({super.key, required this.addNewTransaction});
+class NewTransaction extends StatefulWidget {
+  const NewTransaction({super.key, required this.addNewTransaction});
 
   final Function addNewTransaction;
+
+  @override
+  State<NewTransaction> createState() => _NewTransactionState();
+}
+
+class _NewTransactionState extends State<NewTransaction> {
   final TextEditingController titleController = TextEditingController();
+
   final TextEditingController amountController = TextEditingController();
+
+  //void submitData([BuildContext? context]) {
+    void submitData() {
+    if (titleController.text.isNotEmpty &&
+        double.parse(amountController.text) > 0) {
+      widget.addNewTransaction(
+          titleController.text, double.parse(amountController.text));
+      //if (context != null) {
+        Navigator.of(context).pop();
+        //dissmissKeyboard(context);
+      //}
+      //dismiss keyboard just for button funcitonality
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +42,9 @@ class NewTransaction extends StatelessWidget {
                 controller: titleController,
                 decoration: const InputDecoration(labelText: 'Title')),
             TextField(
+              onSubmitted: (_) => submitData(),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               controller: amountController,
               decoration: const InputDecoration(labelText: 'Amount'),
             ),
@@ -29,11 +53,8 @@ class NewTransaction extends StatelessWidget {
                   foregroundColor:
                       MaterialStateProperty.all<Color>(Colors.purple)),
               child: const Text('Add Transaction'),
-              onPressed: () {
-                addNewTransaction(
-                    titleController.text, double.parse(amountController.text));
-                dissmissKeyboard(context);
-              },
+              //onPressed: () => submitData(context),
+              onPressed: () => submitData(),
             )
           ],
         ),
