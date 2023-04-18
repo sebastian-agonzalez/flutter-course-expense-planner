@@ -21,21 +21,21 @@ class Chartset extends StatelessWidget {
         }
       }
       // ignore: avoid_print
-      print(DateFormat.E().format(weekDay));
+      //print(DateFormat.E().format(weekDay));
       // ignore: avoid_print
-      print(totalSum);
+      //print(totalSum);
 
       return {
         'day': DateFormat.E().format(weekDay).substring(0, 1),
         'amount': totalSum,
       };
-    });
+    }).reversed.toList();
   }
 
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
-    print(groupedTransactionsValues);
+    //print(groupedTransactionsValues);
     return Card(
       elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),

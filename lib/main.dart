@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Quicksand',
         textTheme: const TextTheme(
+            labelMedium: TextStyle(color: Colors.red),
             titleLarge: TextStyle(
                 fontFamily: 'OpenSans',
                 fontSize: 18,
@@ -66,20 +67,25 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addNewTransaction(String title, double amount) {
+  void _addNewTransaction(String title, double amount, DateTime selectedDate) {
     // ignore: avoid_print
     //print('passing');
     final newTx = Transaction(
         id: (Random().nextInt(99) + Random().nextInt(99)).toString(),
         title: title,
         amount: amount,
-        date: DateTime.now());
-
+        date: selectedDate);
+    print(newTx);
     setState(() {
       _userTransactions.add(newTx);
     });
     // ignore: avoid_print
     //print(_userTransactions);
+  }
+
+  void _deleteTransaction(String id) {
+    _userTransactions.removeWhere((element) => element.id == id);
+    setState(() {});
   }
 
   void _startNewTransaction(BuildContext context) {
@@ -109,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             TransactionList(
               transactions: _userTransactions,
+              deleteTransaction: _deleteTransaction,
             )
           ]),
       floatingActionButton: FloatingActionButton(
