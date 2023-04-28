@@ -42,7 +42,12 @@ class _NewTransactionState extends State<NewTransaction> {
     return Card(
       elevation: 5,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.only(
+          top: 10,
+          left: 10,
+          right: 10,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -78,7 +83,7 @@ class _NewTransactionState extends State<NewTransaction> {
             ),
             ElevatedButton(
               // style: ElevatedButton.styleFrom(
-              //     backgroundColor: Theme.of(context).colorScheme.primary),
+              //     backgroundColor: p(context).colorScheme.primary),
               child: const Text('Add Transaction'),
               //onPressed: () => submitData(context),
               onPressed: () => submitData(),

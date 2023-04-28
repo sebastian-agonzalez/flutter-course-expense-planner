@@ -1,13 +1,19 @@
 // ignore_for_file: avoid_unnecessary_containers
 
 import 'package:flutter/material.dart';
+//import 'package:flutter/services.dart';
 import './models/transaction.dart';
 import 'package:expense_planner/widgets/chartset.dart';
 import 'package:expense_planner/widgets/new_transaction.dart';
 import 'package:expense_planner/widgets/transaction_list.dart';
 import 'dart:math';
 
-void main() => runApp(const MyApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -90,37 +96,100 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _startNewTransaction(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (builderContext) =>
-            NewTransaction(addNewTransaction: _addNewTransaction));
+      context: context,
+      isScrollControlled: true,
+      builder: (builderContext) => SingleChildScrollView(
+        child: Container(
+          child: NewTransaction(addNewTransaction: _addNewTransaction),
+        ),
+      ),
+    );
   }
+
+  bool _showChart = false;
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscapeMode = mediaQuery.orientation == Orientation.landscape;
+    final AppBar appBar = AppBar(
+      title: const Text('Personal Expenses'),
+      actions: [
+        IconButton(
+            onPressed: () => _startNewTransaction(context),
+            icon: const Icon(Icons.add))
+      ],
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Personal Expenses'),
-        actions: [
-          IconButton(
-              onPressed: () => _startNewTransaction(context),
-              icon: const Icon(Icons.add))
-        ],
-      ),
+      appBar: appBar,
       body: Column(
           //mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chartset(
-              recentTransactions: _recentTransactions,
-            ),
-            TransactionList(
-              transactions: _userTransactions,
-              deleteTransaction: _deleteTransaction,
-            )
+            if (isLandscapeMode)
+              Row(
+                children: [
+                  const Text('Show Chart'),
+                  Switch(
+                    value: _showChart,
+                    onChanged: (v) => setState(() {
+                      _showChart = v;
+                    }),
+                  ),
+                ],
+              ),
+            if (isLandscapeMode)
+              _showChart
+                  ? getChartsetContainer(
+                      context,
+                      mediaQuery,
+                      appBar,
+                      0.7,
+                    )
+                  : getTxListContainer(context, mediaQuery, appBar),
+            if (!isLandscapeMode)
+              getChartsetContainer(context, mediaQuery, appBar, 0.3),
+            if (!isLandscapeMode)
+              getTxListContainer(context, mediaQuery, appBar),
           ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _startNewTransaction(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Container getChartsetContainer(
+    BuildContext context,
+    MediaQueryData mediaQuery,
+    AppBar appBar,
+    double heightSizePercentage,
+  ) {
+    return Container(
+      height: (mediaQuery.size.height -
+              appBar.preferredSize.height -
+              mediaQuery.padding.top) *
+          heightSizePercentage,
+      child: Chartset(
+        recentTransactions: _recentTransactions,
+      ),
+    );
+  }
+
+  Container getTxListContainer(
+    BuildContext context,
+    MediaQueryData mediaQuery,
+    AppBar appBar,
+  ) {
+    return Container(
+      height: (mediaQuery.size.height -
+              appBar.preferredSize.height -
+              mediaQuery.padding.top) *
+          0.7,
+      child: TransactionList(
+        transactions: _userTransactions,
+        deleteTransaction: _deleteTransaction,
       ),
     );
   }

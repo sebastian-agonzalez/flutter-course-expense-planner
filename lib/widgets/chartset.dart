@@ -36,25 +36,28 @@ class Chartset extends StatelessWidget {
   Widget build(BuildContext context) {
     // ignore: avoid_print
     //print(groupedTransactionsValues);
-    return Card(
-      elevation: 5,
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: groupedTransactionsValues
-              .map((data) => Flexible(
-                    fit: FlexFit.tight,
-                    child: ChartBar(
-                      label: data['day'] as String,
-                      spendingAmount: data['amount'],
-                      spendingPctOfTotal: totalSpending == 0.0
-                          ? totalSpending
-                          : (data['amount'] as double) / totalSpending,
-                    ),
-                  ))
-              .toList(),
+    return Container(
+      //height: MediaQuery.of(context).size.height * 0.4,
+      child: Card(
+        elevation: 5,
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: groupedTransactionsValues
+                .map((data) => Flexible(
+                      fit: FlexFit.tight,
+                      child: ChartBar(
+                        label: data['day'] as String,
+                        spendingAmount: data['amount'],
+                        spendingPctOfTotal: totalSpending == 0.0
+                            ? totalSpending
+                            : (data['amount'] as double) / totalSpending,
+                      ),
+                    ))
+                .toList(),
+          ),
         ),
       ),
     );
