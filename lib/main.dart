@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_unnecessary_containers
+// ignore_for_file: avoid_unnecessary_containers, avoid_print
 
 import 'package:flutter/material.dart';
 //import 'package:flutter/services.dart';
@@ -7,6 +7,8 @@ import 'package:expense_planner/widgets/chartset.dart';
 import 'package:expense_planner/widgets/new_transaction.dart';
 import 'package:expense_planner/widgets/transaction_list.dart';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
+import 'dart:io';
 
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +56,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final List<Transaction> _userTransactions = [
     Transaction(
         amount: 69.99, id: 't1', title: 'New Coat', date: DateTime.now()),
@@ -66,6 +68,23 @@ class _MyHomePageState extends State<MyHomePage> {
     Transaction(
         amount: 12.59, id: 't3', title: 'Snickers', date: DateTime.now()),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState appState) {
+    print(appState);
+  }
+
+  @override
+  dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
@@ -108,50 +127,79 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool _showChart = false;
 
+  Widget _buildAppBar() {
+    return Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: const Text(
+              'Personal Expenses',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  child: const Icon(CupertinoIcons.add),
+                  onTap: () => _startNewTransaction(context),
+                ),
+              ],
+            ),
+          )
+        : AppBar(
+            title: const Text(
+              'Personal Expenses',
+            ),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _startNewTransaction(context),
+              ),
+            ],
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isLandscapeMode = mediaQuery.orientation == Orientation.landscape;
-    final AppBar appBar = AppBar(
-      title: const Text('Personal Expenses'),
-      actions: [
-        IconButton(
-            onPressed: () => _startNewTransaction(context),
-            icon: const Icon(Icons.add))
-      ],
-    );
+    final Widget appBar = _buildAppBar();
+
+    List<Widget> buildLandscapeMode() => [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Show Chart'),
+              Switch(
+                value: _showChart,
+                onChanged: (v) => setState(() {
+                  _showChart = v;
+                }),
+              ),
+            ],
+          ),
+          _showChart
+              ? getChartsetContainer(
+                  context,
+                  mediaQuery,
+                  appBar,
+                  0.7,
+                )
+              : getTxListContainer(context, mediaQuery, appBar)
+        ];
+
+    List<Widget> buildPortraitMode() => [
+          getChartsetContainer(context, mediaQuery, appBar, 0.3),
+          getTxListContainer(context, mediaQuery, appBar),
+        ];
 
     return Scaffold(
-      appBar: appBar,
+      appBar: appBar as PreferredSizeWidget,
       body: Column(
           //mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (isLandscapeMode)
-              Row(
-                children: [
-                  const Text('Show Chart'),
-                  Switch(
-                    value: _showChart,
-                    onChanged: (v) => setState(() {
-                      _showChart = v;
-                    }),
-                  ),
-                ],
-              ),
-            if (isLandscapeMode)
-              _showChart
-                  ? getChartsetContainer(
-                      context,
-                      mediaQuery,
-                      appBar,
-                      0.7,
-                    )
-                  : getTxListContainer(context, mediaQuery, appBar),
-            if (!isLandscapeMode)
-              getChartsetContainer(context, mediaQuery, appBar, 0.3),
-            if (!isLandscapeMode)
-              getTxListContainer(context, mediaQuery, appBar),
+              ...buildLandscapeMode()
+            else
+              ...buildPortraitMode()
           ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _startNewTransaction(context),
@@ -163,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Container getChartsetContainer(
     BuildContext context,
     MediaQueryData mediaQuery,
-    AppBar appBar,
+    appBar,
     double heightSizePercentage,
   ) {
     return Container(
@@ -180,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Container getTxListContainer(
     BuildContext context,
     MediaQueryData mediaQuery,
-    AppBar appBar,
+    appBar,
   ) {
     return Container(
       height: (mediaQuery.size.height -

@@ -1,8 +1,13 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
-  const NewTransaction({super.key, required this.addNewTransaction});
+  NewTransaction({super.key, required this.addNewTransaction}) {
+    //
+    print('Constructor NewTransaction Widget');
+  }
 
   final Function addNewTransaction;
 
@@ -14,6 +19,28 @@ class _NewTransactionState extends State<NewTransaction> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   DateTime? _selectedDate;
+
+  _NewTransactionState() {
+    print('Constructor _NewTransactionState Widget');
+  }
+
+  @override
+  void initState() {
+    print(' _NewTransactionState initState ');
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant NewTransaction oldWidget) {
+    print(' _NewTransactionState didUpdateWidget ');
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    print(' _NewTransactionState dispose ');
+    super.dispose();
+  }
 
   //void submitData([BuildContext? context]) {
   void submitData() {
